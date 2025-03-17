@@ -1,0 +1,114 @@
+<!-- app/templates/shifts.html -->
+{% extends 'layout.html' %}
+{% block title %}<h1>Shifts</h1>{% endblock %}
+{% block content %}
+<form action="{{ url_for('shifts.add_shift') }}" method="get" class="compact-form">
+    <div class="form-group">
+        <label for="name">Shift Name:</label>
+        <select name="shift_name" onchange="this.form.submit()" method="get">
+            <option value="" disabled {% if not request.args.get('shift_name') %}selected{% endif %}>Select a shift name</option>
+            {% for name in available_shift_names %}
+                <option value="{{ name }}" {% if name == request.args.get('shift_name') %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+            <option value="Custom" {% if 'Custom' == request.args.get('shift_name') %}selected{% endif %}>Custom</option>
+        </select>
+    </div>
+</form>
+<form action="{{ url_for('shifts.add_shift') }}" method="post">
+    {% if request.args.get('shift_name') == 'Custom' %}
+    <div class="form-group">
+        <label for="custom_name">Custom Shift Name:</label>
+        <input type="text" name="custom_name" id="custom_name" required>
+    </div>
+    {% endif %}
+    <input type="hidden" name="name" value="{{ request.args.get('shift_name') }}">
+    
+    {% if request.args.get('shift_name') == 'Morning' 
+    or request.args.get('shift_name') == 'Evening' 
+    or request.args.get('shift_name') == 'Night' %}
+    <div class="form-group time-selection">
+        <label for="start_time">Start Time:</label>
+        <select name="start_hour" id="start_hour">
+            <option value="" disabled selected>Hour</option>
+            {% for hour in range(1, 13) %}
+                <option value="{{ hour }}">{{ hour }}</option>
+            {% endfor %}
+        </select>
+        <select name="start_period" id="start_period">
+            <option value="" disabled selected>AM/PM</option>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+        </select>
+        <label for="end_time">End Time:</label>
+        <select name="end_hour" id="end_hour">
+            <option value="" disabled selected>Hour</option>
+            {% for hour in range(1, 13) %}
+                <option value="{{ hour }}">{{ hour }}</option>
+            {% endfor %}
+        </select>
+        <select name="end_period" id="end_period">
+            <option value="" disabled selected>AM/PM</option>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+        </select>
+    </div>
+    {% endif %}
+    <div class="form-group">
+        <label for="bg_color">Background Color:</label>
+        <input type="color" name="bg_color" id="bg_color" value="#ff0000" required>
+    </div>
+    <div class="form-group">
+        <label for="text_color">Text Color:</label>
+        <input type="color" name="text_color" id="text_color" value="#ff0000" required>
+    </div>
+    
+    <button type="submit">Add Shift</button>
+    <a href="{{ url_for('shifts.index') }}" class="cancel-button">Reset</a>
+</form>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Background color</th>
+            <th>Text color</th>
+            <th>Edit</th>
+            <th>Status</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for shift in shifts %}
+            <tr id="shift-{{ shift.id }}">
+                <td>{{ shift.name }}</td>
+                <td>{{ shift.start_time }}</td>
+                <td>{{ shift.end_time }}</td>
+                <td>
+                    <div style="width: 30px; height: 30px; border: 1px solid #ccc; background-color: {{ shift.bg_color }}; ">
+                    </div>
+                </td>
+                <td>
+                    <div style="width: 30px; height: 30px; border: 1px solid #ccc; background-color: {{ shift.text_color }}; ">
+                    </div>
+                </td>
+                <td class="action-column">
+                    <a href="{{ url_for('shifts.edit_shift', id=shift.id) }}" class="edit-button" title="Edit">Edit</a>
+                </td>
+                
+                <td class="action-column">
+                    <form action="{{ url_for('shifts.toggle_active_shift', id=shift.id) }}" method="POST" class="in_table">
+                        <button type="submit" class="toggle-button {% if shift.is_active %}active{% else %}inactive{% endif %}">
+                            {{ 'Active' if shift.is_active else 'Inactive' }}
+                        </button>
+                    </form>
+                </td>
+                <td class="action-column">
+                    <a href="{{ url_for('shifts.delete_shift', id=shift['id']) }}"  title="Delete" 
+                    onclick="return confirm('Are you sure you want to delete the shift {{ shift.name }}?');" class="delete-button"> Delete </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

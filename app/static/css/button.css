@@ -1,0 +1,61 @@
+/* static/css/button.css */
+
+form button, .delete-button, .cancel-button, .edit-button, .logout-button, .yellow-button, .blue-button {
+  /* padding: 10px 17px; Reduced from 12px 24px */
+  border-radius: 25px;
+  border: none;
+  cursor: pointer; 
+  text-decoration: none;
+  display: inline-block;
+}
+
+form button {
+  background-color: #FFE900; 
+  color: #00414B;
+}
+
+form button:hover {
+  background-color: #ffcc00; 
+}
+
+
+.delete-button {
+  background-color: indianred;
+  color: #f0f0f0;
+}
+
+.delete-button:hover {
+  background-color: darkred; 
+}
+
+.cancel-button, .edit-button, .logout-button {
+  background-color: #f0f0f0;
+  color: #00414B; 
+  margin-left: 10px;
+}
+
+.cancel-button:hover, .edit-button:hover, .logout-button:hover {
+  background-color: #e0e0e0; 
+}
+
+.edit-button {
+  margin-left: 0px;
+}
+
+.yellow-button {
+  background-color: #FFE900; 
+  color: #00414B; 
+}
+
+.yellow-button:hover {
+  background-color: #ffcc00; 
+}
+
+.blue-button {
+  background-color: #276079;
+  color: #ffffff;
+}
+
+.blue-button:hover {
+  background-color: #00414B;
+}

@@ -1,0 +1,25 @@
+/* static/css/media.css */
+
+
+/* For typical laptop screens */
+@media screen and (min-width: 1024px) and (max-width: 1366px) {
+    body, form button {
+        font-size: 14px;
+    }
+
+    form button, .delete-button, .cancel-button, .edit-button, .logout-button, .yellow-button, .blue-button {
+        padding: 10px 17px;
+    }
+
+}
+
+/* For larger display screens */
+@media screen and (min-width: 1367px) {
+    body, form button{
+        font-size: 16px;
+    }
+
+    form button, .delete-button, .cancel-button, .edit-button, .logout-button, .yellow-button, .blue-button {
+        padding: 10px 17px;
+    }
+}

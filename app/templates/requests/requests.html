@@ -1,0 +1,39 @@
+<!-- app/templates/requests/requests.html -->
+
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>REST/OFF Requests</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Shift</th>
+            <th>Date</th>
+            <th>Request Type</th>
+            <th>Approve</th>
+            <th>Reject</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request in requests %}
+        <tr>
+            <td>{{ request.employee_name }}</td>
+            <td>{{ request.shift_name }}</td>
+            <td>{{ request.date }}</td>
+            <td>{{ request.request_status }}</td>
+            <td>
+                <form action="{{ url_for('requests.approve_request', id=request.id) }}" method="post" class="in_table">
+                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                </form>
+            </td>
+            <td>
+                <form action="{{ url_for('requests.reject_request', id=request.id) }}" method="post" class="in_table">
+                    <button type="submit" class="delete-button">Reject</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

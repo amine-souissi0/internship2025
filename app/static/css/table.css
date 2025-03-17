@@ -1,0 +1,43 @@
+/* static/css/table.css */
+
+table {
+    width: 100%;
+    border-collapse: separate;  
+    margin-top: 20px;
+    border-spacing: 0;
+    border-radius: 100px;
+}
+
+th, td {
+    padding: 12px; /* Add padding to table cells for better spacing */
+    text-align: left; /* Align text to the left */
+    border-bottom: 1px solid #ccc; /* Add a bottom border for separation */
+}
+
+th {
+    background-color: #f2f2f2; /* Light background color for header */
+    color: #00414B; /* Header text color */
+}
+
+tr:hover {
+    background-color: #f9f9f9; /* Change background on row hover for better visibility */
+}
+
+.edit-time-column {
+    width: 140px;
+    text-align: left;
+    padding-right: 30px;
+}
+
+.action-column {
+    width: 70px;
+    text-align: left;
+    padding-right: 30px;
+}
+
+
+.in_table{
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+}  

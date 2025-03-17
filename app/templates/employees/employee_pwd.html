@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+
+{% block title %}<h1>Reveal Password</h1>{% endblock %}
+
+{% block content %}
+<div>
+    <h2>Password for {{ employee.fullname }}</h2>
+    
+    {% if not edit_mode %}
+    <form>
+        <div class="form-group">
+        <label for="name">Password:</label>
+        <span class= "fixed-select-display" id="shift_name"> {{ password }}</span>
+        </div>
+        <a href="{{ url_for('employees.edit_password', id=employee.id) }}" class="blue-button">Edit</a>
+        <a href="{{ url_for('employees.index') }}" class="cancel-button">Back to Employees</a>
+    </form>
+
+    {% else %}
+    
+    <form method="POST">
+        <div class="form-group">
+            <label for="new_password">New Password:</label>
+            <input type="password" name="new_password" id="new_password" required>
+        </div>
+        <button type="submit" class="blue-button">Update Password</button>
+        <a href="{{ url_for('employees.index') }}" class="cancel-button">Cancel</a>
+    </form>
+
+    {% endif %}
+
+    
+</div>
+
+
+
+{% endblock %}

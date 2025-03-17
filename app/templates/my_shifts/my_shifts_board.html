@@ -1,0 +1,80 @@
+<!-- templates/my_shifts/my_shifts_board.html -->
+
+<div class="board-navigation">
+    <form action="{{ url_for('my_shifts.select_month') }}" method="post">
+        <input type="date" name="selected_date" required onchange="this.form.submit()">
+        <a href="{{ url_for('my_shifts.index', month_offset=0) }}" class="nav-button">Current month</a>
+    </form>
+    <div>
+        <a href="{{ url_for('my_shifts.index', month_offset=month_offset-1) }}" class="nav-button">&lt; Previous</a>
+        <span>{{ target_date.strftime('%B %Y') }}</span>
+        <a href="{{ url_for('my_shifts.index', month_offset=month_offset+1) }}" class="nav-button">Next &gt;</a>
+    </div>
+</div>
+
+<div class="board">
+    <table>
+        <thead>
+            <tr>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Sunday</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for week in calendar_weeks %}
+                <tr>
+                    {% for day in week %}
+                        <td class="{% if day.month != target_date.month %} other-month {% endif %}">
+                            <div class="date">{{ day.day }}</div>
+                            <div class="
+                                {% if day.month != target_date.month %} other-month {% endif %}
+                                {% if day.strftime('%Y-%m-%d') in shifts_by_date %}
+                                    {% if shifts_by_date[day.strftime('%Y-%m-%d')]['request_status'] in ['PENDING', 'REQUESTED'] %}
+                                        pending-approval
+                                    {% elif shifts_by_date[day.strftime('%Y-%m-%d')]['request_status'] == 'REJECTED' %}
+                                        rejected-shift
+                                    {% endif %}
+                                {% endif %}
+                                "
+                                style="
+                                    padding: 0px; 
+                                    background-color: 
+                                        {% if day.strftime('%Y-%m-%d') in shifts_by_date %}
+                                            {{ shifts_by_date[day.strftime('%Y-%m-%d')]['bg_color'] }}
+                                        {% endif %}; 
+                                    color: 
+                                        {% if day.strftime('%Y-%m-%d') in shifts_by_date %}
+                                            {{ shifts_by_date[day.strftime('%Y-%m-%d')]['text_color'] }}
+                                        {% endif %}
+                                    "
+                            >
+                                <form method="POST" action="{{ url_for('my_shifts.assign_shift', month_offset=month_offset) }}" class="in_table">
+                                    <input type="hidden" name="employee_id" value="{{ current_user.employee_id }}">
+                                    <input type="hidden" name="date" value="{{ day.strftime('%Y-%m-%d') }}">
+                                    <input type="hidden" name="month_offset" value="{{ month_offset }}">
+                                    <select name="shift_id" onchange="this.form.submit()" class="in_board">
+                                        <option value=""> </option>
+                                        {% for shift in shifts %}
+                                            <option value="{{ shift.id }}"
+                                                    {% if day.strftime('%Y-%m-%d') in shifts_by_date and shifts_by_date[day.strftime('%Y-%m-%d')]['name'] == shift.name %}
+                                                        selected
+                                                    {% endif %}
+                                                    style="background-color: {{ shift.bg_color }}; color: {{ shift.text_color }}">
+                                                {{ shift.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </div>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

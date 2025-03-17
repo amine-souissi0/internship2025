@@ -1,0 +1,94 @@
+/* static/css/form.css */
+
+form {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.compact-form {
+  padding: 20px 0 0 20px;
+}
+
+.compact-form .form-group {
+  margin-bottom: 0;
+}
+
+.compact-form select {
+  margin-bottom: 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.grid-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 800px;
+}
+
+.text-field-container {
+  margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="date"],
+form input[type="time"],
+form select {
+  font-size: 14px;
+  color: #00414B;
+  width: calc(100% - 20px);
+  max-width: calc(30ch + 20px);
+  padding: 10px;
+  margin: 4px;
+  border-radius: 25px;
+  border: 1px solid #ccc; 
+}
+
+.time-selection {
+  display: flex;
+  align-items: center;
+}
+
+.time-selection label {
+  margin-right: 10px;
+}
+
+.time-selection select {
+  margin-right: 10px;
+} 
+
+.time-selection select[name='start_hour'],
+.time-selection select[name='end_hour'] {
+  max-width: 74px;
+}
+
+
+.time-selection select[name='start_period'],
+.time-selection select[name='end_period'] {
+  max-width: 87px;
+}
+
+form input[type="color"] {
+  margin-bottom: 10px;
+}
+
+form input[type="time"] {
+  max-width: 100px;
+}
+
+.fixed-select-display {
+  display: inline-block;
+  font-size: 14px;
+  color: #00414B;
+  padding: 10px;
+  border-radius: 25px; 
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  min-width: calc(17ch);
+  max-width: calc(30ch + 20px);
+  margin-left: 10px;
+}

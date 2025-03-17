@@ -1,0 +1,29 @@
+<!-- templates/edit_employee_shift.html -->
+
+{% extends 'layout.html' %}
+
+{% block title %}<h1>Edit Employee Shift</h1>{% endblock %}
+
+{% block content %}
+<form action="{{ url_for('employee_shift.edit_assignment', id=employee_shift.employee_shift.id) }}" method="post">
+    <div class="form-group">
+        <select name="employee_id" required>
+            {% for employee in employees %}
+                <option value="{{ employee.id }}" {% if employee.id == employee_shift.employee_shift.employee_id %}selected{% endif %}>
+                    {{ employee.fullname }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="shift_id" required>
+            {% for shift in shifts %}
+                <option value="{{ shift.id }}" {% if shift.id == employee_shift.employee_shift.shift_id %}selected{% endif %}>
+                    {{ shift.name }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="date" name="date" value="{{ employee_shift.employee_shift.date }}" required>
+    </div>
+    <button type="submit">Update Assignment</button>
+    <a href="{{ url_for('employee_shift.index') }}" class="cancel-button">Cancel</a>
+</form>
+{% endblock %}

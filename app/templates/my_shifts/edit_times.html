@@ -1,0 +1,27 @@
+<!-- templates/my_shifts/edit_times.html -->
+
+{% extends 'layout.html' %}
+
+{% block title %}<h1>Edit times</h1>{% endblock %}
+
+{% block content %}
+<form action="{{ url_for('my_shifts.update_actual_times', id=employee_shift.id) }}" method="post">
+    <div class="form-group">
+        <input type="hidden" name="employee_id" value="{{ employee_id }}">
+        
+        <p>Shift: {{ shift_name }} </p>
+        <p>Usual Start and End Time: {{ shift_start_time }}  - {{ shift_end_time }}</p>
+        
+        <div>
+            <label for="actual_start_time">Actual Start Time:</label>
+            <input type="time" name="actual_start_time" value="{{ actual_start_time or shift_start_time }}">
+        </div> 
+        <div>
+            <label for="actual_start_time">Actual End Time:</label>
+            <input type="time" name="actual_end_time" value="{{ actual_end_time or shift_end_time}}">
+        </div>
+    </div>
+    <button type="submit">Update Times</button>
+    <a href="{{ url_for('my_shifts.index', employee_id=employee_id) }}" class="cancel-button">Cancel</a>
+</form>
+{% endblock %}

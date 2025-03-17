@@ -1,0 +1,85 @@
+<!-- app/templates/employees.html -->
+{% extends 'layout.html' %}
+
+{% block title %}<h1>Employees</h1>{% endblock %}
+
+{% block content %}
+
+<div>
+    <h2>Add New Employee</h2>
+    <form action="{{ url_for('employees.add_employee') }}" method="post">
+        <div class="form-group">
+            <div class="text-field-container">
+                <input type="text" name="first_name" placeholder="First name" required>
+                <input type="text" name="last_name" placeholder="Last name" required>
+            </div>
+            <div class="text-field-container">
+                <input type="text" name="team" placeholder="Team name" required>
+            </div>
+            <div class="text-field-container">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+        </div>
+        <button type="submit">Add Employee</button>
+    </form>
+</div>
+
+
+<div>
+    <h2>Employee List</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Team</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Role</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in employees_with_users %}
+                <tr id="employee-{{ item.employee.id }}">
+                    <td>{{ item.employee.fullname }}</td>
+                    <td>{{ item.employee.team }}</td>
+                    <td>{{ item.username or 'N/A' }}</td>
+                    
+                    {% if item.user_id %}
+                    <td>
+                            <form method="POST" action="{{ url_for('employees.reveal_password', id=item.user_id) }}" class="in_table">
+                                <button type="submit">Reveal Password</button>
+                            </form>
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('employees.update_role', id=item.user_id) }}" class="in_table">
+                            <select name="role" onchange="this.form.submit()">
+                                <option value="adc_employee" {% if item.role == 'adc_employee' %}selected{% endif %}>ADC Employee</option>
+                                <option value="manager" {% if item.role == 'manager' %}selected{% endif %}>Manager</option>
+                            </select>
+                        </form>
+                    </td>
+                    {% else %}
+                        <td>
+                            <p>No user account</p>
+                        </td>
+                        <td>
+                            <p>No user account</p>
+                        </td>
+                    {% endif %}
+                    <td class="action-column">
+                        <a href="{{ url_for('employees.edit_employee', id=item.employee.id) }}" class="edit-button" title="Edit">Edit</a>
+                    </td>
+                    <td class="action-column">
+                        <a href="{{ url_for('employees.delete_employee', id=item.employee.id, next=request.path) }}" title="Delete" 
+                        onclick="return confirm('Are you sure you want to delete the employee {{ item.employee.fullname }}?');" class="delete-button"> Delete </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

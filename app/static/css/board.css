@@ -1,0 +1,159 @@
+.board {
+  width: 100%;
+  margin: 20px 0;
+  border-collapse: collapse;
+}
+
+.board table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.board th, .board td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+.board th {
+  background-color: #00414B;
+  color: white;
+}
+
+.team-header td {
+  background-color: #e6e6e6;
+  font-weight: bold;
+  color: #00414B;
+  text-align: left;
+  padding-left: 10px;
+}
+
+.board td {
+  min-width: 120px;
+}
+
+.board tr:hover {
+  background-color: #f2f2f2;
+}
+
+/* Style for shift cells */
+.shift-cell {
+  font-weight: bold;
+  text-align: center;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+
+
+.team-header td {
+  background-color: #e6e6e6;
+  font-weight: bold;
+  color: #00414B;
+}
+
+.spacer td {
+  height: 10px;
+  background-color: #ffffff;
+  border-bottom: none;
+}
+
+.in_board {
+  background-color: transparent; 
+  border: none;
+  appearance: none;
+  margin: 0;
+  width: 100%;
+  border-radius: 0px;
+  color: inherit;
+}
+
+.shift-box {
+  padding: 5px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Color classes for different shifts */
+.shift-morning {
+  background-color: #ffeb3b;
+}
+
+.shift-evening {
+  background-color: #f57c00;
+  color: white;
+}
+
+.shift-night {
+  background-color: #512da8;
+  color: white;
+}
+
+.shift-off {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+.shift-mta {
+  background-color: #29b6f6;
+  color: white;
+}
+
+.pending-approval {
+  background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255,255,255,0.5) 10px,
+      rgba(255,255,255,0.5) 20px
+  );
+}
+
+.rejected-shift {
+  background-image: 
+    linear-gradient(45deg, transparent 45%, red 45%, red 55%, transparent 55%),
+    linear-gradient(-45deg, transparent 45%, red 45%, red 55%, transparent 55%);
+  background-size: 33% 100%;
+}
+
+.board-navigation {
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px 20px;
+  padding-top: 5px;
+}
+
+.board-navigation form {
+  background-color: transparent;
+  padding: 20px;
+  padding-top: 0px;
+  padding-left: 0px;
+  border-radius: 0;
+}
+
+.board-navigation input[type="date"] {
+  width: 110px;
+  margin-right: 10px;
+}
+
+.nav-button {
+  padding: 10px 15px;
+  background-color: #f2f2f2;
+  color: #00414B;
+  text-decoration: none;
+  border-radius: 25px;
+}
+
+.nav-button:hover {
+  background-color: #e6e6e6;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .board {
+      overflow-x: auto;
+  }
+}

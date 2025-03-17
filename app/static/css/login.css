@@ -1,0 +1,44 @@
+/* static/css/login.css */
+
+/* Centering logout message */
+.container-no-flex {
+    display: block;
+    min-height: 100vh;
+    text-align: center; /* Center text */
+}
+
+.login-title {
+    text-align: center;
+}
+
+  
+ul {
+    list-style-type: none; /* Remove default list styling */
+    padding-left: 0; /* Remove left padding */
+}
+
+.logout {
+    max-width: 140px;
+    margin-top: auto;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.logout-button {
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+    border-color: #ffffff;
+}
+
+.logout a {
+    color: #00414B;
+    text-decoration: none;
+}
+
+.logout a:hover {
+    color: #ffffff;
+    background-color: darkred ;
+}

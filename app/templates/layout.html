@@ -1,0 +1,32 @@
+<!-- app/templates/layout.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>ADC shifts</title>
+</head>
+<body>
+    <div class="container">
+        
+        {% include 'sidebar.html' %}
+
+        <div class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <ul class="flashes">
+                  {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
+          
+            {% block title %}{% endblock %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

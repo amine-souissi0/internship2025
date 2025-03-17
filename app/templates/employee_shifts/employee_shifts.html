@@ -1,0 +1,137 @@
+{% extends 'layout.html' %}
+
+{% block title %} <h1>Employee Shifts</h1> {% endblock %}
+
+{% block content %}
+<h2>Employee Shift Assignments</h2>
+
+<!-- Shift Assignment Form -->
+<form action="{{ url_for('employee_shift.assign_shift') }}" method="post">
+    <div class="form-group">
+        <label for="employee_id">Employee</label>
+        <select name="employee_id" required>
+            <option value="" disabled selected>Select Employee</option>
+            {% for employee in employees %}
+                <option value="{{ employee.id }}">{{ employee.fullname }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="shift_id">Shift</label>
+        <select name="shift_id" required>
+            <option value="" disabled selected>Select Shift</option>
+            {% for shift in shifts %}
+                <option value="{{ shift.id }}">{{ shift.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="date">Date</label>
+        <input type="date" name="date" required>
+
+        <label for="start_time">Start Time</label>
+        <input type="time" name="start_time" id="start_time" required value="08:00">
+        
+        <label for="end_time">End Time</label>
+        <input type="time" name="end_time" id="end_time" required value="11:00">
+
+        <label for="shift_type">Shift Type</label>
+        <select name="shift_type" id="shift_type" required onchange="toggleCustomInput()">
+            <option value="Regular">Regular</option>
+            <option value="Medical Leave">Medical Leave</option>
+            <option value="MTA">MTA</option>
+            <option value="Time Off">Time Off</option>
+        </select>
+
+        <label for="custom_details">Additional Details (Optional)</label>
+        <textarea name="custom_details" id="custom_details" placeholder="Additional information about the shift..."></textarea>
+    </div>
+
+    <button type="submit">Assign Shift</button>
+</form>
+
+<script>
+    // Ensure time fields always submit valid data
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("start_time").value = "08:00";
+        document.getElementById("end_time").value = "11:00";
+    });
+</script>
+
+<!-- Display Shifts Sorted by Team -->
+{% if employee_shifts.shifts_by_team %}
+    {% for team, shifts in employee_shifts.shifts_by_team.items() %}
+        {% if shifts %} <!-- Prevent empty teams from rendering -->
+            <h3 style="color: blue; margin-top: 20px;">Team: {{ team }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Employee</th>
+                        <th>Shift</th>
+                        <th>Start Time</th> <!-- ✅ Ensure time is displayed -->
+                        <th>End Time</th> <!-- ✅ Ensure time is displayed -->
+                        <th>Shift Type</th>
+                        <th>Custom Details</th>
+                        <th>Approval Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in shifts %}
+                        <tr>
+                            <td>{{ data.employee_shift.date }}</td>
+                            <td>{{ data.employee_name }}</td>
+                            <td>{{ data.shift_name }}</td>
+
+                            <td>
+                                {% if data.employee_shift.start_time %}
+                                    {{ data.employee_shift.start_time }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if data.employee_shift.end_time %}
+                                    {{ data.employee_shift.end_time }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            
+                            
+
+                            <td>{{ data.employee_shift.shift_type }}</td>
+                            <td>
+                                {% if data.employee_shift.custom_details %}
+                                    {{ data.employee_shift.custom_details }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if data.employee_shift.shift_type == 'Time Off' and data.employee_shift.approval_status == 'Pending' %}
+                                    <form action="{{ url_for('employee_shift.approve_request', id=data.employee_shift.id) }}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-success">Approve</button>
+                                    </form>
+                                    <form action="{{ url_for('employee_shift.reject_request', id=data.employee_shift.id) }}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger">Reject</button>
+                                    </form>
+                                {% else %}
+                                    {{ data.employee_shift.approval_status }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('employee_shift.edit_assignment', id=data.employee_shift.id) }}" class="edit-button">Edit</a>
+                                <a href="{{ url_for('employee_shift.delete_assignment', id=data.employee_shift.id) }}" class="delete-button"
+                                onclick="return confirm('Are you sure you want to delete this shift?');">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    {% endfor %}
+{% else %}
+    <p>No shift data available.</p>
+{% endif %}
+
+{% endblock %}

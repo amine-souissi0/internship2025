@@ -1,0 +1,92 @@
+{% extends 'layout.html' %}
+
+{% block title %}<h1>Employees</h1>{% endblock %}
+
+{% block content %}
+
+<h2>Board</h2>
+
+<!-- Week Navigation -->
+<div class="board-navigation">
+    <form action="{{ url_for('board.select_week') }}" method="post">
+        <input type="date" name="selected_date" required onchange="this.form.submit()">
+        <a href="{{ url_for('board.index', week_offset=0) }}" class="nav-button">Current Week</a>
+    </form>
+    <div>
+        <a href="{{ url_for('board.index', week_offset=week_offset-1) }}" class="nav-button">&lt; Previous</a>
+        <span>Week of {{ dates[0].strftime('%B %d, %Y') }}</span>
+        <a href="{{ url_for('board.index', week_offset=week_offset+1) }}" class="nav-button">Next &gt;</a>
+    </div>
+</div>
+
+<!-- Board Table -->
+<div class="board">
+    <table>
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>User ID</th>
+                <th>Full Name</th>
+                {% for date in dates %}
+                    <th>{{ date.strftime('%a %d/%m') }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for team, employees in teams.items() %}
+                <tr class="team-header">
+                    <td colspan="{{ dates|length + 3 }}">{{ team }}</td>
+                </tr>
+                {% for employee in employees %}
+                    <tr>
+                        <td>{{ team }}</td>
+                        <td>{{ employee.id }}</td>
+                        <td>{{ employee.fullname }}</td>
+                        {% for date in dates %}
+                            <td>
+                                {% set shift = shifts_by_employee.get(employee.id, {}).get(date.strftime('%Y-%m-%d')) %}
+                                {% if shift %}
+                                    <span class="shift-box">{{ shift }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    /* Board Table Styling */
+    .board table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .board th, .board td {
+        padding: 8px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+    .board th {
+        background-color: #005f73;
+        color: white;
+    }
+    .team-header {
+        background-color: #ccc;
+        font-weight: bold;
+        text-align: left;
+    }
+    .shift-box {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #66b3ff;
+        color: white;
+        border-radius: 5px;
+    }
+</style>
+
+{% endblock %}

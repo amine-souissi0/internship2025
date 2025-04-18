@@ -1,0 +1,43 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests targeting the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use Ubuntu to run the workflow
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2  # Checkout your repository's code
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1  # Set up Docker buildx for advanced builds
+
+    - name: Cache Docker layers
+      uses: actions/cache@v2  # Cache Docker layers for faster builds
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Build Docker image
+      run: |
+        docker build -t gocho123/my-flask-app:${{ github.sha }} .
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2  # Login to Docker Hub
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username stored in GitHub Secrets
+        password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub password stored in GitHub Secrets
+
+    - name: Push Docker image to Docker Hub
+      run: |
+        docker push gocho123/my-flask-app:${{ github.sha }}  # Push the image with commit SHA
+        docker push gocho123/my-flask-app:latest  # Also push with the 'latest' tag

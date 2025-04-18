@@ -30,45 +30,45 @@ jobs:
     - name: Get existing version tags from Docker Hub
       id: get_tags
       run: |
-        # Fetch tags from Docker Hub and determine the latest version tag
+        # Fetch tags from Docker Hub and filter only version tags that match vX.Y.Z format
         TAGS=$(curl -s https://hub.docker.com/v2/repositories/gocho123/my-flask-app/tags/ | jq -r '.results[].name')
         
-        # Extract version tags that follow the vX.Y.Z format and sort them
+        # Extract version tags that follow vX.Y.Z format and sort them
         VERSION_TAGS=$(echo "$TAGS" | grep -oP 'v[0-9]+\.[0-9]+\.[0-9]+' | sort -V)
         
-        # Determine the latest version tag
+        # Get the latest version tag
         LATEST_TAG=$(echo "$VERSION_TAGS" | tail -n 1)
-        
-        # If no tag exists, start from v1.0.0
+
+        # If no tags exist, start from v1.0.0
         if [ -z "$LATEST_TAG" ]; then
           NEXT_TAG="v1.0.0"
         else
-          # Extract version components (vX.Y.Z) from the latest tag
+          # Extract major, minor, and patch version numbers
           VERSION=$(echo "$LATEST_TAG" | sed 's/v//')
           MAJOR_MINOR_PATCH=$(echo "$VERSION" | cut -d. -f1,2,3)
-          
-          # Increment the patch version by 1
+
+          # Increment patch version (e.g., v1.0.0 -> v1.0.1)
           PATCH_VERSION=$(echo "$VERSION" | cut -d. -f3)
           NEXT_PATCH=$((PATCH_VERSION + 1))
-          
-          # Construct the next tag
+
+          # Generate the next version tag
           NEXT_TAG="v${MAJOR_MINOR_PATCH}.${NEXT_PATCH}"
         fi
-        
+
         echo "Next version tag: $NEXT_TAG"
-        
+
         # Save the next tag to a GitHub environment variable for later use
         echo "NEXT_TAG=$NEXT_TAG" >> $GITHUB_ENV
 
     - name: Build Docker image
       run: |
-        # Build the Docker image and tag it with commit SHA and 'latest'
+        # Build the Docker image and tag it with commit SHA, latest, and new version
         docker build -t gocho123/my-flask-app:${{ github.sha }} .  # Tag with commit SHA
         docker tag gocho123/my-flask-app:${{ github.sha }} gocho123/my-flask-app:latest  # Tag with 'latest'
         docker tag gocho123/my-flask-app:${{ github.sha }} gocho123/my-flask-app:${{ env.NEXT_TAG }}  # New version tag (e.g., v1.0.1)
 
     - name: Log in to Docker Hub
-      uses: docker/login-action@v2  # 
+      uses: docker/login-action@v2  # Login to Docker Hub
       with:
         username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username stored in GitHub Secrets
         password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub password (personal access token) stored in GitHub Secrets

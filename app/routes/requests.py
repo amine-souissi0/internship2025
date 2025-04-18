@@ -62,3 +62,15 @@ def reject_request(id):
     else:
         flash('Failed to reject request', 'error')
     return redirect(url_for('requests.view_requests'))
+
+def reset_pending_shifts(employee_id):
+    db = get_db()
+    db.execute(
+        '''
+        UPDATE employee_shift
+        SET approval_status = 'Pending'
+        WHERE employee_id = ? AND shift_type IN ('OFF', 'REST')
+        ''',
+        (employee_id,)
+    )
+    db.commit()

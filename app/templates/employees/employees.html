@@ -5,6 +5,18 @@
 
 {% block content %}
 
+<!-- Display Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+{% if is_manager %}
 <div>
     <h2>Add New Employee</h2>
     <form action="{{ url_for('employees.add_employee') }}" method="post">
@@ -24,7 +36,7 @@
         <button type="submit">Add Employee</button>
     </form>
 </div>
-
+{% endif %}
 
 <div>
     <h2>Employee List</h2>
@@ -49,17 +61,25 @@
                     
                     {% if item.user_id %}
                     <td>
+                        {% if is_manager %}
                             <form method="POST" action="{{ url_for('employees.reveal_password', id=item.user_id) }}" class="in_table">
                                 <button type="submit">Reveal Password</button>
                             </form>
+                        {% else %}
+                            <p>Restricted</p>
+                        {% endif %}
                     </td>
                     <td>
-                        <form method="POST" action="{{ url_for('employees.update_role', id=item.user_id) }}" class="in_table">
-                            <select name="role" onchange="this.form.submit()">
-                                <option value="adc_employee" {% if item.role == 'adc_employee' %}selected{% endif %}>ADC Employee</option>
-                                <option value="manager" {% if item.role == 'manager' %}selected{% endif %}>Manager</option>
-                            </select>
-                        </form>
+                        {% if is_manager %}
+                            <form method="POST" action="{{ url_for('employees.update_role', id=item.user_id) }}" class="in_table">
+                                <select name="role" onchange="this.form.submit()">
+                                    <option value="adc_employee" {% if item.role == 'adc_employee' %}selected{% endif %}>ADC Employee</option>
+                                    <option value="manager" {% if item.role == 'manager' %}selected{% endif %}>Manager</option>
+                                </select>
+                            </form>
+                        {% else %}
+                            <p>{{ item.role }}</p>
+                        {% endif %}
                     </td>
                     {% else %}
                         <td>
@@ -70,16 +90,45 @@
                         </td>
                     {% endif %}
                     <td class="action-column">
-                        <a href="{{ url_for('employees.edit_employee', id=item.employee.id) }}" class="edit-button" title="Edit">Edit</a>
+                        {% if is_manager %}
+                            <a href="{{ url_for('employees.edit_employee', id=item.employee.id) }}" class="edit-button" title="Edit">Edit</a>
+                        {% else %}
+                            <span>-</span>
+                        {% endif %}
                     </td>
                     <td class="action-column">
-                        <a href="{{ url_for('employees.delete_employee', id=item.employee.id, next=request.path) }}" title="Delete" 
-                        onclick="return confirm('Are you sure you want to delete the employee {{ item.employee.fullname }}?');" class="delete-button"> Delete </a>
+                        {% if is_manager %}
+                            <a href="{{ url_for('employees.delete_employee', id=item.employee.id, next=request.path) }}" title="Delete" 
+                            onclick="return confirm('Are you sure you want to delete the employee {{ item.employee.fullname }}?');" class="delete-button">Delete</a>
+                        {% else %}
+                            <span>-</span>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<style>
+    .flash-messages {
+        margin-bottom: 20px;
+    }
+    .alert {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
 
 {% endblock %}

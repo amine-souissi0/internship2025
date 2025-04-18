@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+<h1>{{ user_name }} - {{ shift_type }} Shift Details</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Day</th>
+                <th>Shift Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for shift in shifts %}
+                <tr>
+                    <td>{{ shift.datetime }}</td>
+                    <td>{{ shift.type }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.container {
+    margin: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background-color: #8BC34A;
+}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+</style>
+{% endblock %}

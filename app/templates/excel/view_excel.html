@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+<h1>View Uploaded Excel Data</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Team</th>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Shift Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.team }}</td>
+                <td>{{ row.user_id }}</td>
+                <td>{{ row.full_name }}</td>
+                <td>
+                    <ul>
+                        {% for key, value in row.data.items() %}
+                            <li><strong>{{ key }}:</strong> {{ value }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        vertical-align: top;
+    }
+
+    th {
+        background-color: #8BC34A;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+</style>
+{% endblock %}

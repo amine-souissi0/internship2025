@@ -1,78 +1,17 @@
-<!-- app/templates/shifts.html -->
 {% extends 'layout.html' %}
+
 {% block title %}<h1>Shifts</h1>{% endblock %}
+
 {% block content %}
-<form action="{{ url_for('shifts.add_shift') }}" method="get" class="compact-form">
-    <div class="form-group">
-        <label for="name">Shift Name:</label>
-        <select name="shift_name" onchange="this.form.submit()" method="get">
-            <option value="" disabled {% if not request.args.get('shift_name') %}selected{% endif %}>Select a shift name</option>
-            {% for name in available_shift_names %}
-                <option value="{{ name }}" {% if name == request.args.get('shift_name') %}selected{% endif %}>{{ name }}</option>
-            {% endfor %}
-            <option value="Custom" {% if 'Custom' == request.args.get('shift_name') %}selected{% endif %}>Custom</option>
-        </select>
-    </div>
-</form>
-<form action="{{ url_for('shifts.add_shift') }}" method="post">
-    {% if request.args.get('shift_name') == 'Custom' %}
-    <div class="form-group">
-        <label for="custom_name">Custom Shift Name:</label>
-        <input type="text" name="custom_name" id="custom_name" required>
-    </div>
-    {% endif %}
-    <input type="hidden" name="name" value="{{ request.args.get('shift_name') }}">
-    
-    {% if request.args.get('shift_name') == 'Morning' 
-    or request.args.get('shift_name') == 'Evening' 
-    or request.args.get('shift_name') == 'Night' %}
-    <div class="form-group time-selection">
-        <label for="start_time">Start Time:</label>
-        <select name="start_hour" id="start_hour">
-            <option value="" disabled selected>Hour</option>
-            {% for hour in range(1, 13) %}
-                <option value="{{ hour }}">{{ hour }}</option>
-            {% endfor %}
-        </select>
-        <select name="start_period" id="start_period">
-            <option value="" disabled selected>AM/PM</option>
-            <option value="AM">AM</option>
-            <option value="PM">PM</option>
-        </select>
-        <label for="end_time">End Time:</label>
-        <select name="end_hour" id="end_hour">
-            <option value="" disabled selected>Hour</option>
-            {% for hour in range(1, 13) %}
-                <option value="{{ hour }}">{{ hour }}</option>
-            {% endfor %}
-        </select>
-        <select name="end_period" id="end_period">
-            <option value="" disabled selected>AM/PM</option>
-            <option value="AM">AM</option>
-            <option value="PM">PM</option>
-        </select>
-    </div>
-    {% endif %}
-    <div class="form-group">
-        <label for="bg_color">Background Color:</label>
-        <input type="color" name="bg_color" id="bg_color" value="#ff0000" required>
-    </div>
-    <div class="form-group">
-        <label for="text_color">Text Color:</label>
-        <input type="color" name="text_color" id="text_color" value="#ff0000" required>
-    </div>
-    
-    <button type="submit">Add Shift</button>
-    <a href="{{ url_for('shifts.index') }}" class="cancel-button">Reset</a>
-</form>
+<!-- Display Shifts List -->
 <table>
     <thead>
         <tr>
             <th>Name</th>
             <th>Start Time</th>
             <th>End Time</th>
-            <th>Background color</th>
-            <th>Text color</th>
+            <th>Background Color</th>
+            <th>Text Color</th>
             <th>Edit</th>
             <th>Status</th>
             <th>Delete</th>
@@ -84,31 +23,86 @@
                 <td>{{ shift.name }}</td>
                 <td>{{ shift.start_time }}</td>
                 <td>{{ shift.end_time }}</td>
+                <td style="background-color: {{ shift.bg_color }};"></td>
+                <td style="background-color: {{ shift.text_color }};"></td>
+                <td><a href="{{ url_for('shifts.edit_shift', id=shift.id) }}" class="edit-button">Edit</a></td>
                 <td>
-                    <div style="width: 30px; height: 30px; border: 1px solid #ccc; background-color: {{ shift.bg_color }}; ">
-                    </div>
-                </td>
-                <td>
-                    <div style="width: 30px; height: 30px; border: 1px solid #ccc; background-color: {{ shift.text_color }}; ">
-                    </div>
-                </td>
-                <td class="action-column">
-                    <a href="{{ url_for('shifts.edit_shift', id=shift.id) }}" class="edit-button" title="Edit">Edit</a>
-                </td>
-                
-                <td class="action-column">
-                    <form action="{{ url_for('shifts.toggle_active_shift', id=shift.id) }}" method="POST" class="in_table">
+                    <form action="{{ url_for('shifts.toggle_active_shift', id=shift.id) }}" method="POST">
                         <button type="submit" class="toggle-button {% if shift.is_active %}active{% else %}inactive{% endif %}">
                             {{ 'Active' if shift.is_active else 'Inactive' }}
                         </button>
                     </form>
                 </td>
-                <td class="action-column">
-                    <a href="{{ url_for('shifts.delete_shift', id=shift['id']) }}"  title="Delete" 
-                    onclick="return confirm('Are you sure you want to delete the shift {{ shift.name }}?');" class="delete-button"> Delete </a>
-                </td>
+                <td><a href="{{ url_for('shifts.delete_shift', id=shift.id) }}" class="delete-button" onclick="return confirm('Are you sure you want to delete this shift?');">Delete</a></td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<!-- Add Shift Form (Moved to the bottom) -->
+<form action="{{ url_for('shifts.add_shift') }}" method="post" class="shift-add-form">
+    <h3>Add New Shift</h3>
+
+    <!-- Shift Name (Radio Buttons for predefined shifts) -->
+    <div class="form-group">
+        <label>Shift Name:</label>
+        <div>
+            <input type="radio" id="morning" name="shift_name" value="Morning" required>
+            <label for="morning">Morning</label>
+            <input type="radio" id="evening" name="shift_name" value="Evening" required>
+            <label for="evening">Evening</label>
+            <input type="radio" id="night" name="shift_name" value="Night" required>
+            <label for="night">Night</label>
+            <input type="radio" id="rest" name="shift_name" value="REST" required>
+            <label for="rest">REST</label>
+            <input type="radio" id="off" name="shift_name" value="Off" required>
+            <label for="off">Off</label>
+            <input type="radio" id="mta" name="shift_name" value="MTA" required>
+            <label for="mta">MTA</label>
+        </div>
+    </div>
+
+    <!-- Custom Shift Name Option -->
+    <div class="form-group" id="custom_name_group" style="display: none;">
+        <label for="custom_name">Custom Shift Name:</label>
+        <input type="text" name="custom_name" id="custom_name">
+    </div>
+
+    <!-- Time Selection for predefined shifts -->
+    <div class="form-group time-selection" id="time-selection">
+        <label for="start_time">Start Time:</label>
+        <input type="time" name="start_time" id="start_time" required>
+
+        <label for="end_time">End Time:</label>
+        <input type="time" name="end_time" id="end_time" required>
+    </div>
+
+    <!-- Color Selection -->
+    <div class="form-group">
+        <label for="bg_color">Background Color:</label>
+        <input type="color" name="bg_color" id="bg_color" value="#ff0000" required>
+    </div>
+
+    <div class="form-group">
+        <label for="text_color">Text Color:</label>
+        <input type="color" name="text_color" id="text_color" value="#000000" required>
+    </div>
+
+    <button type="submit">Add Shift</button>
+    <a href="{{ url_for('shifts.index') }}" class="cancel-button">Reset</a>
+</form>
+
 {% endblock %}
+
+<script>
+    // Show/hide custom shift name input based on the selected radio button
+    document.querySelectorAll('input[name="shift_name"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.value === 'Custom') {
+                document.getElementById('custom_name_group').style.display = 'block';
+            } else {
+                document.getElementById('custom_name_group').style.display = 'none';
+            }
+        });
+    });
+</script>

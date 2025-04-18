@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+<h1>Shift Summary</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if stats %}
+        <h4>Total Shifts by User and Type</h4>
+        <a href="{{ url_for('excel.export_stats') }}" class="btn btn-success">Download Shift Summary (Excel)</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Morning</th>
+                    <th>Night</th>
+                    <th>Off</th>
+                    <th>REST</th>
+                    <th>MTA</th>
+                    <th>TOIL</th>
+                    <th>AL</th>
+                    <th>OFF Day & Replacing Full Evening Shift</th>
+                    <th>Morning shift & Cont 2nd half Evening replacement</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user, shifts in stats.items() %}
+                <tr>
+                    <!-- ✅ Full Name column -->
+                    <td>{{ user }}</td>
+                
+                    <!-- ✅ Clickable shift type counts -->
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='Morning') }}">{{ shifts['Morning'] }}</a></td>
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='Night') }}">{{ shifts['Night'] }}</a></td>
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='Off') }}">{{ shifts['Off'] }}</a></td>
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='REST') }}">{{ shifts['REST'] }}</a></td>
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='MTA') }}">{{ shifts['MTA'] }}</a></td>
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='TOIL') }}">{{ shifts['TOIL'] }}</a></td>
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='AL') }}">{{ shifts['AL'] }}</a></td>
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='OFF Day & Replacing Full Evening Shift') }}">{{ shifts['OFF Day & Replacing Full Evening Shift'] }}</a></td>
+                    <td><a href="{{ url_for('excel.shift_details', user_name=user|urlencode, shift_type='Morning shift & Cont 2nd half Evening replacement') }}">{{ shifts['Morning shift & Cont 2nd half Evening replacement'] }}</a></td>
+                </tr>
+                
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No shift data available.</p>
+    {% endif %}
+</div>
+
+<style>
+.container {
+    margin: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+th {
+    background-color: #8BC34A;
+}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+</style>
+{% endblock %}

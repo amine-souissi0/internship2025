@@ -15,6 +15,14 @@
         <li><a href="{{ url_for('shifts.index') }}" class="{% if active == 'shifts' %}active{% endif %} menu-item">Shifts</a></li>
         <li><a href="{{ url_for('employee_shift.index') }}" class="{% if active == 'employee_shifts' %}active{% endif %} menu-item">Employee Shifts</a></li>
         <li><a href="{{ url_for('requests.view_requests') }}" class="{% if active == 'requests' %}active{% endif %} menu-item">Approval Requests</a></li>
+
+        <li>
+            <a href="{{ url_for('excel.index') }}" class="{% if active == 'excel' %}active{% endif %} menu-item">
+                Import/Export Excel
+            </a>
+        </li>
+        
+
     {% endif %}
     </ul>
 

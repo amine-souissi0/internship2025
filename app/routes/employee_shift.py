@@ -44,6 +44,10 @@ def index():
 
 
 
+# app/routes/employee_shift.py
+
+# app/routes/employee_shift.py
+
 @employee_shift_bp.route('/assign', methods=['POST'])
 def assign_shift():
     employee_id = request.form['employee_id']
@@ -51,9 +55,38 @@ def assign_shift():
     date = request.form['date']
     start_time = request.form['start_time']
     end_time = request.form['end_time']
+    shift_type = request.form.get('shift_type', 'Regular')
+    custom_details = request.form.get('custom_details', None)
 
     if employee_id and shift_id and date and start_time and end_time:
-        employee_shift_service.assign_shift(employee_id, shift_id, date, start_time, end_time)
+        try:
+            # Check if a shift already exists for this employee on this date
+            existing_shift = employee_shift_service.get_existing_shift(employee_id, date)
+            if existing_shift:
+                flash(f'Cannot assign shift: Employee already has a shift on {date}.', 'error')
+                return redirect(url_for('employee_shift.index'))
+            # Fetch the shift name to determine approval status
+            shift = shift_service.get_shift_by_id(shift_id)
+            shift_name = shift.name.upper() if shift else ""
+            approval_status = 'Pending' if 'OFF' in shift_name or shift_type == 'Time Off' else 'Approved'
+
+            employee_shift_service.assign_shift(
+                employee_id=employee_id,
+                shift_id=shift_id,
+                date=date,
+                start_time=start_time,
+                end_time=end_time,
+                shift_type=shift_type,
+                custom_details=custom_details,
+                approval_status=approval_status
+            )
+            flash('Shift assigned successfully!', 'success')
+        except ValueError as ve:
+            flash(str(ve), 'error')  # Flash the conflict message
+        except Exception as e:
+            flash(f'An error occurred while assigning the shift: {str(e)}', 'error')
+    else:
+        flash('Please fill in all required fields.', 'error')
 
     return redirect(url_for('employee_shift.index'))
 

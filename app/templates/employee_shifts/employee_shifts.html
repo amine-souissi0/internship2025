@@ -5,6 +5,17 @@
 {% block content %}
 <h2>Employee Shift Assignments</h2>
 
+<!-- Display Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
 <!-- Shift Assignment Form -->
 <form action="{{ url_for('employee_shift.assign_shift') }}" method="post">
     <div class="form-group">
@@ -16,11 +27,16 @@
             {% endfor %}
         </select>
 
-        <label for="shift_id">Shift</label>
-        <select name="shift_id" required>
+        <label for="shift_id">Select Shift</label>
+        <select name="shift_id" id="shift_id" required onchange="autoFillTimes()">
             <option value="" disabled selected>Select Shift</option>
             {% for shift in shifts %}
-                <option value="{{ shift.id }}">{{ shift.name }}</option>
+                <option 
+                    value="{{ shift.id }}"
+                    data-start="{{ shift.start_time }}"
+                    data-end="{{ shift.end_time }}">
+                    {{ shift.name }}
+                </option>
             {% endfor %}
         </select>
 
@@ -29,7 +45,7 @@
 
         <label for="start_time">Start Time</label>
         <input type="time" name="start_time" id="start_time" required value="08:00">
-        
+
         <label for="end_time">End Time</label>
         <input type="time" name="end_time" id="end_time" required value="11:00">
 
@@ -49,17 +65,39 @@
 </form>
 
 <script>
-    // Ensure time fields always submit valid data
-    document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById("start_time").value = "08:00";
-        document.getElementById("end_time").value = "11:00";
-    });
+    function autoFillTimes() {
+      const shiftDropdown = document.getElementById('shift_id');
+      const selectedOption = shiftDropdown.options[shiftDropdown.selectedIndex];
+  
+      if (selectedOption) {
+        const start = selectedOption.getAttribute('data-start');
+        const end = selectedOption.getAttribute('data-end');
+  
+        document.getElementById('start_time').value = formatTo24h(start);
+        document.getElementById('end_time').value = formatTo24h(end);
+      }
+    }
+
+    function formatTo24h(timeStr) {
+      if (!timeStr || timeStr.toLowerCase() === "none") return "";
+      const date = new Date(`1970-01-01T${convert12hTo24h(timeStr)}`);
+      return date.toTimeString().slice(0, 5);
+    }
+
+    function convert12hTo24h(time) {
+      if (!time) return "";
+      const [hourStr, modifier] = time.trim().split(' ');
+      let hour = parseInt(hourStr);
+      if (modifier === "PM" && hour !== 12) hour += 12;
+      if (modifier === "AM" && hour === 12) hour = 0;
+      return `${String(hour).padStart(2, '0')}:00`;
+    }
 </script>
 
 <!-- Display Shifts Sorted by Team -->
 {% if employee_shifts.shifts_by_team %}
     {% for team, shifts in employee_shifts.shifts_by_team.items() %}
-        {% if shifts %} <!-- Prevent empty teams from rendering -->
+        {% if shifts %}
             <h3 style="color: blue; margin-top: 20px;">Team: {{ team }}</h3>
             <table>
                 <thead>
@@ -67,8 +105,8 @@
                         <th>Date</th>
                         <th>Employee</th>
                         <th>Shift</th>
-                        <th>Start Time</th> <!-- ✅ Ensure time is displayed -->
-                        <th>End Time</th> <!-- ✅ Ensure time is displayed -->
+                        <th style="display:none;">Start Time</th>
+                        <th style="display:none;">End Time</th>
                         <th>Shift Type</th>
                         <th>Custom Details</th>
                         <th>Approval Status</th>
@@ -81,24 +119,20 @@
                             <td>{{ data.employee_shift.date }}</td>
                             <td>{{ data.employee_name }}</td>
                             <td>{{ data.shift_name }}</td>
-
-                            <td>
+                            <td style="display:none;">
                                 {% if data.employee_shift.start_time %}
                                     {{ data.employee_shift.start_time }}
                                 {% else %}
                                     -
                                 {% endif %}
                             </td>
-                            <td>
+                            <td style="display:none;">
                                 {% if data.employee_shift.end_time %}
                                     {{ data.employee_shift.end_time }}
                                 {% else %}
                                     -
                                 {% endif %}
                             </td>
-                            
-                            
-
                             <td>{{ data.employee_shift.shift_type }}</td>
                             <td>
                                 {% if data.employee_shift.custom_details %}
@@ -133,5 +167,26 @@
 {% else %}
     <p>No shift data available.</p>
 {% endif %}
+
+<style>
+    .flash-messages {
+        margin-bottom: 20px;
+    }
+    .alert {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
 
 {% endblock %}

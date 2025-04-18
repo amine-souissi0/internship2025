@@ -5,6 +5,7 @@ from flask_login import LoginManager, current_user
 from config import Config
 from app.services.user_service import get_user_by_id
 from .database.db import get_db
+from .routes.excel import excel_bp
 
 
 def create_app(config_class=Config):
@@ -41,6 +42,7 @@ def create_app(config_class=Config):
     app.register_blueprint(board.board_bp, url_prefix='/board')
     app.register_blueprint(my_shifts.my_shifts_bp, url_prefix='/my_shifts')
     app.register_blueprint(requests.requests_bp, url_prefix='/requests')
+    app.register_blueprint(excel_bp)
 
     @app.teardown_appcontext
     def close_connection(exception):

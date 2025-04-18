@@ -78,59 +78,37 @@ def get_all_employee_shifts():
 
 
 
-def assign_shift(employee_id, shift_id, date, start_time, end_time, shift_type="Regular", custom_details=None):
+# app/services/employee_shift_service.py
+
+# app/services/employee_shift_service.py
+
+def assign_shift(employee_id, shift_id, date, start_time, end_time, shift_type="Regular", custom_details=None, approval_status="Approved"):
     db = get_db()
-    
-    # ✅ Print received values before inserting into DB
-    print(f"DEBUG: Assigning Shift -> Employee: {employee_id}, Shift: {shift_id}, Date: {date}, Start: {start_time}, End: {end_time}")
-
     try:
-        # ✅ Ensure time is correctly formatted
-        def format_time(time_str):
-            if time_str:
-                try:
-                    return datetime.strptime(time_str.strip(), '%H:%M').strftime('%H:%M')  # Format HH:MM
-                except ValueError:
-                    print(f"⚠️ Invalid time format received: {time_str}")
-                    return None
-            return None
-
-        start_time = format_time(start_time)
-        end_time = format_time(end_time)
-
-        print(f"✅ FORMATTED: Start Time: {start_time}, End Time: {end_time}")
-
-        existing = db.execute(
+        # Check if there's an existing shift for this employee and date
+        existing_shift = db.execute(
             'SELECT id FROM employee_shift WHERE employee_id = ? AND date = ?',
             (employee_id, date)
         ).fetchone()
+        if existing_shift:
+            db.execute('DELETE FROM employee_shift WHERE id = ?', (existing_shift['id'],))
 
-        if existing:
-            print(f"🔄 Updating existing shift ID {existing['id']}")
-            update_employee_shift(existing['id'], employee_id, shift_id, date, start_time, end_time, shift_type, custom_details)
-            return existing['id']
-        else:
-            print(f"🆕 Inserting new shift -> Start: {start_time}, End: {end_time}")
-
-            approval_status = "Pending" if shift_type == "Time Off" else "Approved"
-
-            result = db.execute(
-                '''
-                INSERT INTO employee_shift (employee_id, shift_id, date, start_time, end_time, shift_type, custom_details, approval_status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''',
-                (employee_id, shift_id, date, start_time, end_time, shift_type, custom_details, approval_status)
-            )
-
+        # Insert new shift assignment with all fields
+        db.execute(
+            '''
+            INSERT INTO employee_shift (employee_id, shift_id, date, start_time, end_time, shift_type, custom_details, approval_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (employee_id, shift_id, date, start_time, end_time, shift_type, custom_details, approval_status)
+        )
         db.commit()
-        return result.lastrowid
+        return True
     except Exception as e:
         db.rollback()
-        print(f"❌ ERROR assigning shift: {e}")
-        return None
+        print(f"Error assigning shift: {e}")
+        return False
     finally:
         db.close()
-
 
 
 
@@ -240,3 +218,255 @@ def delete_assignment_by_employee_and_date(employee_id, date):
         return False
     finally:
         db.close()
+
+
+def get_all_shifts():
+    db = get_db()
+    try:
+        shifts = db.execute('SELECT * FROM shifts').fetchall()  # Retrieve all shifts from the database
+        return shifts
+    except Exception as e:
+        print(f"Error fetching shifts: {e}")
+        return []
+    finally:
+        db.close()
+
+
+def get_existing_shift(employee_id, date):
+    db = get_db()
+    try:
+        row = db.execute(
+            '''
+            SELECT shift_type, approval_status 
+            FROM employee_shift 
+            WHERE employee_id = ? AND date = ?
+            ''', (employee_id, date)).fetchone()
+        return row if row else None
+    except Exception as e:
+        print(f"Error getting existing shift: {e}")
+        return None
+    finally:
+        db.close()
+
+def assign_shift_with_status(employee_id, shift_id, date, start_time, end_time, shift_type="Regular", custom_details=None, approval_status="Approved"):
+    db = get_db()
+    
+    print(f"DEBUG: Assigning Shift with Status -> Employee: {employee_id}, Shift: {shift_id}, Date: {date}, Start: {start_time}, End: {end_time}, Shift Type: {shift_type}, Status: {approval_status}")
+
+    try:
+        # Format time
+        def format_time(time_str):
+            if time_str:
+                try:
+                    return datetime.strptime(time_str.strip(), '%H:%M').strftime('%H:%M')
+                except ValueError:
+                    print(f"⚠️ Invalid time format received: {time_str}")
+                    return None
+            return None
+
+        start_time = format_time(start_time)
+        end_time = format_time(end_time)
+
+        print(f"✅ FORMATTED: Start Time: {start_time}, End Time: {end_time}")
+
+        result = db.execute(
+            '''
+            INSERT INTO employee_shift (employee_id, shift_id, date, start_time, end_time, shift_type, custom_details, approval_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (employee_id, shift_id, date, start_time, end_time, shift_type, custom_details, approval_status)
+        )
+
+        db.commit()
+        return result.lastrowid
+    except Exception as e:
+        db.rollback()
+        print(f"❌ ERROR assigning shift with status: {e}")
+        return None
+    finally:
+        db.close()
+
+
+# app/services/employee_shift_service.py
+
+def get_existing_shift_row(employee_id, date):
+    db = get_db()
+    try:
+        row = db.execute(
+            '''
+            SELECT id, employee_id, shift_id, date, shift_type, approval_status 
+            FROM employee_shift 
+            WHERE employee_id = ? AND date = ?
+            ''', (employee_id, date)).fetchone()
+        return row if row else None
+    except Exception as e:
+        print(f"Error getting existing shift row: {e}")
+        return None
+    finally:
+        db.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+                

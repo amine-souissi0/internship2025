@@ -100,3 +100,17 @@ def toggle_active_shift(id):
         print(f"Error toggling shift: {e}")
     finally:
         db.close()
+
+
+def get_shift_by_id(shift_id):
+    db = get_db()
+    try:
+        row = db.execute('SELECT * FROM shifts WHERE id = ?', (shift_id,)).fetchone()
+        if row:
+            return Shift(row['name'], row['bg_color'], row['text_color'], row['start_time'], row['end_time'], row['id'], row['is_active'])
+        return None
+    except Exception as e:
+        print(f"Error fetching shift by ID: {e}")
+        return None
+    finally:
+        db.close()

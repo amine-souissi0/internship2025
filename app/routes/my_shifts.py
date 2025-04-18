@@ -73,8 +73,27 @@ def assign_shift():
 
     if employee_id and date:
         if shift_id:
-            employee_shift_service.assign_shift(employee_id, shift_id, date)
+            # Fetch shift details from the DB
+            shift = shift_service.get_shift_by_id(shift_id)
+
+            # Use start_time and end_time from DB or fallback to empty string
+            start_time = shift.start_time if shift.start_time else ""
+            end_time = shift.end_time if shift.end_time else ""
+
+            # Determine approval status based on shift name
+            shift_name = shift.name.upper() if shift else ""
+            approval_status = 'Pending' if shift_name in ['OFF', 'REST'] else 'Approved'
+
+            employee_shift_service.assign_shift(
+                employee_id,
+                shift_id,
+                date,
+                start_time,
+                end_time,
+                approval_status=approval_status  # Pass approval_status
+            )
         else:
+            # If no shift selected, delete assignment
             employee_shift_service.delete_assignment_by_employee_and_date(employee_id, date)
 
     return redirect(url_for('my_shifts.index', month_offset=month_offset, employee_id=employee_id))

@@ -22,24 +22,30 @@ def get_employee_shifts_by_employee_id(employee_id):
         rows = db.execute(
             '''
             SELECT es.id, es.employee_id, es.shift_id, es.date, 
-                es.actual_start_time, es.actual_end_time, es.overtime_hours, es.request_status,
+                   es.actual_start_time, es.actual_end_time, es.overtime_hours, es.request_status,
+                   es.approval_status,
                    e.first_name || ' ' || e.last_name AS employee_name, 
                    s.name AS shift_name, s.bg_color AS shift_bg_color, s.text_color AS shift_text_color
             FROM employee_shift es
             JOIN employees e ON es.employee_id = e.id
             JOIN shifts s ON es.shift_id = s.id
             WHERE es.employee_id = ?
-        ''', (employee_id, )).fetchall()
+            ''', (employee_id, )).fetchall()
         shifts = [{
             'employee_shift': 
-                EmployeeShift(row['id'], row['employee_id'], 
-                    row['shift_id'], row['date'], 
+                EmployeeShift(
+                    row['id'], 
+                    row['employee_id'], 
+                    row['shift_id'], 
+                    row['date'], 
                     format_time(row['actual_start_time']),
                     format_time(row['actual_end_time']),
                     row['overtime_hours'],
-                    row['request_status']),
-            'employee_name':row['employee_name'],
-            'shift_name':row['shift_name'],
+                    row['request_status'],
+                    approval_status=row['approval_status'] or 'Approved'
+                ),
+            'employee_name': row['employee_name'],
+            'shift_name': row['shift_name'],
             'shift_bg_color': row['shift_bg_color'],
             'shift_text_color': row['shift_text_color']            
         } for row in rows]
@@ -50,7 +56,7 @@ def get_employee_shifts_by_employee_id(employee_id):
         }
     except Exception as e:
         print(f"Error fetching employee shifts: {e}")
-        return []
+        return {'shifts': [], 'total_overtime': '00:00'}
     finally:
         db.close()
 

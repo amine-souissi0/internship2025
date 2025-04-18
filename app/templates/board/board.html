@@ -3,7 +3,6 @@
 {% block title %}<h1>Employees</h1>{% endblock %}
 
 {% block content %}
-
 <h2>Board</h2>
 
 <!-- Week Navigation -->
@@ -13,80 +12,100 @@
         <a href="{{ url_for('board.index', week_offset=0) }}" class="nav-button">Current Week</a>
     </form>
     <div>
-        <a href="{{ url_for('board.index', week_offset=week_offset-1) }}" class="nav-button">&lt; Previous</a>
+        <a href="{{ url_for('board.index', week_offset=week_offset-1) }}" class="nav-button">< Previous</a>
         <span>Week of {{ dates[0].strftime('%B %d, %Y') }}</span>
-        <a href="{{ url_for('board.index', week_offset=week_offset+1) }}" class="nav-button">Next &gt;</a>
+        <a href="{{ url_for('board.index', week_offset=week_offset+1) }}" class="nav-button">Next ></a>
     </div>
 </div>
 
 <!-- Board Table -->
-<div class="board">
-    <table>
-        <thead>
-            <tr>
-                <th>Team</th>
-                <th>User ID</th>
-                <th>Full Name</th>
-                {% for date in dates %}
-                    <th>{{ date.strftime('%a %d/%m') }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for team, employees in teams.items() %}
-                <tr class="team-header">
-                    <td colspan="{{ dates|length + 3 }}">{{ team }}</td>
+<form id="board-form" method="post" action="{{ url_for('board.update_shifts') }}">
+    <div class="board">
+        <table>
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    {% for date in dates %}
+                        <th>{{ date.strftime('%a %d/%m') }}</th>
+                    {% endfor %}
                 </tr>
-                {% for employee in employees %}
-                    <tr>
-                        <td>{{ team }}</td>
-                        <td>{{ employee.id }}</td>
-                        <td>{{ employee.fullname }}</td>
-                        {% for date in dates %}
-                            <td>
-                                {% set shift = shifts_by_employee.get(employee.id, {}).get(date.strftime('%Y-%m-%d')) %}
-                                {% if shift %}
-                                    <span class="shift-box">{{ shift }}</span>
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                        {% endfor %}
+            </thead>
+            <tbody>
+                {% for team, employees in teams.items() %}
+                    <tr class="team-header">
+                        <td colspan="{{ dates|length + 3 }}">{{ team }}</td>
                     </tr>
+                    {% for employee in employees %}
+                        <tr>
+                            <td>{{ team }}</td>
+                            <td>{{ employee.id }}</td>
+                            <td>{{ employee.fullname }}</td>
+                            {% for date in dates %}
+                                {% set emp_shifts = shifts_by_employee.get(employee.id, {}) %}
+                                {% set shift = emp_shifts.get(date.strftime('%Y-%m-%d')) %}
+                                <td>
+                                    <div style="display: flex; align-items: center; justify-content: center;">
+                                        <select name="shift_{{ employee.id }}_{{ date.strftime('%Y-%m-%d') }}" class="shift-dropdown">
+                                            <option value="" {% if not shift %}selected{% endif %}>-</option>
+                                            {% for shift_option in all_shifts %}
+                                                <option value="{{ shift_option['id'] }}"
+                                                    {% if shift and shift_option['name'] in shift.display %}selected{% endif %}>
+                                                    {{ shift_option['name'] }} ({{ shift_option['start_time'] }} - {{ shift_option['end_time'] }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        {% if shift %}
+                                            {% if shift.approval_status == 'Pending' %}
+                                                <span style="color: orange; margin-left: 5px;">(Pending)</span>
+                                            {% elif shift.approval_status == 'Approved' %}
+                                                <span style="color: green; margin-left: 5px;">(Approved)</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+    </div>
+    <button type="submit" class="save-button">Save Changes</button>
+</form>
 
 <style>
-    /* Board Table Styling */
-    .board table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-    .board th, .board td {
-        padding: 8px;
-        text-align: center;
-        border: 1px solid #ddd;
-    }
-    .board th {
-        background-color: #005f73;
-        color: white;
-    }
-    .team-header {
-        background-color: #ccc;
-        font-weight: bold;
-        text-align: left;
-    }
-    .shift-box {
-        display: inline-block;
-        padding: 5px 10px;
-        background-color: #66b3ff;
-        color: white;
-        border-radius: 5px;
-    }
+    .board table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .board th, .board td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+    .board th { background-color: #005f73; color: white; }
+    .team-header { background-color: #ccc; font-weight: bold; text-align: left; }
+    .shift-dropdown { padding: 5px; width: 100%; }
+    .save-button { margin-top: 20px; padding: 10px 20px; background-color: #005f73; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .save-button:hover { background-color: #004d5a; }
 </style>
+
+<script>
+    document.getElementById('board-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Shifts updated successfully!');
+                location.reload(); // Refresh the page to reflect changes
+            } else {
+                alert('Error updating shifts: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while saving shifts.');
+        });
+    });
+</script>
 
 {% endblock %}

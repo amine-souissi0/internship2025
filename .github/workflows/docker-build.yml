@@ -76,6 +76,6 @@ jobs:
     - name: Push Docker image to Docker Hub
       run: |
         # Push the image with commit SHA, 'latest', and the new version tag (e.g., v1.0.1)
-        docker push gocho123/my-flask-app:${{ github.sha }}  # Push the image with commit SHA
-        docker push gocho123/my-flask-app:latest  # Push the 'latest' tag
+        docker push gocho123/my-flask-app:${{ github.sha }}  
+        docker push gocho123/my-flask-app:latest  
         docker push gocho123/my-flask-app:${{ env.NEXT_TAG }}  # Push the new version tag (e.g., v1.0.1)

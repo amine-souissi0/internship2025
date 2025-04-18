@@ -59,11 +59,12 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username stored in GitHub Secrets
         password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub password (personal access token) stored in GitHub Secrets
 
-    - name: Tag the image with the new version
+    - name: Tag the image with the new version and latest
       run: |
         docker tag gocho123/my-flask-app:${{ github.sha }} gocho123/my-flask-app:${{ steps.get_version.outputs.version }}
+        docker tag gocho123/my-flask-app:${{ github.sha }} gocho123/my-flask-app:latest  # Always update 'latest'
 
     - name: Push Docker image to Docker Hub
       run: |
-        docker push gocho123/my-flask-app:${{ steps.get_version.outputs.version }}
-        docker push gocho123/my-flask-app:latest  # Also push with the 'latest' tag
+        docker push gocho123/my-flask-app:${{ steps.get_version.outputs.version }}  # Push the versioned image
+        docker push gocho123/my-flask-app:latest  # Push the latest tag to always update it

@@ -1,34 +1,20 @@
+# Use a Python base image
 FROM python:3.9-slim
 
-FROM nginx:latest
-
-COPY ./nginx.conf /etc/nginx/nginx.conf
-
-
-
-# Add additional necessary configuration
-
-# Install Nginx and dependencies
-RUN apt-get update && apt-get install -y \
-    nginx \
-    certbot \
-    python3-certbot-nginx \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Flask and other dependencies
-COPY requirements.txt /app/
+# Set the working directory inside the container
 WORKDIR /app
-RUN pip install -r requirements.txt
 
-# Add your Flask application
+# Copy the requirements file into the container
+COPY requirements.txt /app/
+
+# Install dependencies from requirements file
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application files into the container
 COPY . /app/
 
-# Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+# Expose the port your application will run on
+EXPOSE 5000
 
-# Expose ports for Nginx and Flask
-EXPOSE 80
-EXPOSE 443
-
-# Command to start both Flask and Nginx
-CMD service nginx start && python app.py
+# Command to run the application
+CMD ["python", "run.py"]

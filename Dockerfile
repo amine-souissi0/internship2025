@@ -1,5 +1,12 @@
 FROM python:3.9-slim
 
+FROM nginx:latest
+
+COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./path/to/your/certificates /etc/letsencrypt/
+
+# Add additional necessary configuration
+
 # Install Nginx and dependencies
 RUN apt-get update && apt-get install -y \
     nginx \

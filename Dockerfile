@@ -3,7 +3,7 @@ FROM python:3.9-slim
 FROM nginx:latest
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
-COPY ./certbot /etc/letsencrypt/
+
 
 
 # Add additional necessary configuration

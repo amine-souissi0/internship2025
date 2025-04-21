@@ -19,9 +19,10 @@ COPY . /app
 # Copy the Nginx configuration file
 COPY ./nginx.conf /etc/nginx/nginx.conf
 
-# Copy the SSL certificates into the container
+# Copy SSL certificates into the container
 COPY ./certbot/self-signed.crt /etc/ssl/certs/self-signed.crt
 COPY ./certbot/self-signed.key /etc/ssl/private/self-signed.key
+
 
 # Expose the ports your application will run on
 EXPOSE 5000 443

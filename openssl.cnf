@@ -1,5 +1,0 @@
-[ req ]
-distinguished_name = req_distinguished_name
-
-[ req_distinguished_name ]
-# Leave this empty to use the -subj values from the command

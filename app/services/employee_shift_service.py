@@ -166,36 +166,45 @@ def get_employee_shift(id):
 def update_employee_shift(id, employee_id, shift_id, date, shift_type="Regular", custom_details=None):
     db = get_db()
     employee_shift_info = get_detailed_employee_shift(id)
-    print(f"Updating employee_shift {employee_shift_info}")
-
     try:
-        shift = db.execute('SELECT start_time, end_time FROM shifts WHERE id = ?', (shift_id,)).fetchone()
+        shift = db.execute('SELECT name, start_time, end_time FROM shifts WHERE id = ?', (shift_id,)).fetchone()
 
         start_time = datetime.strptime(shift['start_time'], '%I %p').strftime('%H:%M') if shift['start_time'] else None
         end_time = datetime.strptime(shift['end_time'], '%I %p').strftime('%H:%M') if shift['end_time'] else None
 
-        # Determine approval status based on shift type
-        approval_status = "Pending" if shift_type == "Time Off" else "Approved"
+        shift_name = shift['name'].upper() if shift else ""
+        
+        if shift_name == "OFF":
+            shift_type = "OFF"
+            approval_status = "Approved"
+        elif shift_name == "REST":
+            shift_type = "REST"
+            approval_status = "Pending"
+        else:
+            shift_type = "Regular"
+            approval_status = "Approved"
 
+        # Update clearly
         db.execute(
             '''
-            UPDATE employee_shifts 
-            SET employee_id = ?, shift_id = ?, date = ?, request_status = 'NONE', 
-                start_time = ?, end_time = ?, shift_type = ?, custom_details = ?, approval_status = ?
+            UPDATE employee_shift 
+            SET employee_id = ?, shift_id = ?, date = ?, 
+                start_time = ?, end_time = ?, shift_type = ?, 
+                custom_details = ?, approval_status = ?
             WHERE id = ?
-        ''', (employee_id, shift_id, date, start_time, end_time, shift_type, custom_details, approval_status, id))
-        
-        employee_shift_info = get_detailed_employee_shift(id)
-        print(f"Updated employee_shift {employee_shift_info}")
+            ''',
+            (employee_id, shift_id, date, start_time, end_time, shift_type, custom_details, approval_status, id)
+        )
 
         db.commit()
         return True
     except Exception as e:
         db.rollback()
-        print(f"Error updating employee shift: {e}")
+        print(f"Error updating shift: {e}")
         return False
     finally:
         db.close()
+
         
 def delete_assignment_by_employee_and_date(employee_id, date):
     db = get_db()
@@ -307,8 +316,59 @@ def get_existing_shift_row(employee_id, date):
 
 
 
+def get_approved_off_days(employee_id):
+    db = get_db()
+    try:
+        result = db.execute(
+            '''
+            SELECT COUNT(*) as approved_off_days
+            FROM employee_shift
+            WHERE employee_id = ? AND shift_type = 'OFF' AND approval_status = 'Approved'
+            ''',
+            (employee_id,)
+        ).fetchone()
+        return result['approved_off_days'] if result else 0
+    except Exception as e:
+        print(f"Error fetching approved off days: {e}")
+        return 0
 
 
+def approve_off_day_request(request_id):
+    db = get_db()
+    try:
+        shift_request = db.execute(
+            'SELECT employee_id, approval_status FROM employee_shift WHERE id = ?',
+            (request_id,)
+        ).fetchone()
+
+        if shift_request and shift_request['approval_status'] != 'Approved':
+            db.execute('''
+                UPDATE employee_shift SET approval_status = 'Approved' WHERE id = ?
+            ''', (request_id,))
+
+            # Clearly reduce off days only now
+            employee_id = shift_request['employee_id']
+            user = db.execute('SELECT remaining_off_days FROM users WHERE employee_id = ?', (employee_id,)).fetchone()
+
+            if user and user['remaining_off_days'] > 0:
+                db.execute(
+                    'UPDATE users SET remaining_off_days = remaining_off_days - 1 WHERE employee_id = ?',
+                    (employee_id,)
+                )
+            else:
+                raise Exception("User has no remaining off days.")
+
+            db.commit()
+            return True
+        else:
+            return False
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error during approval: {e}")
+        return False
+    finally:
+        db.close()
 
 
 

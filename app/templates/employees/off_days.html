@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block title %}<h1>Employee Off Days</h1>{% endblock %}
+
+{% block content %}
+<h2>Off Days Overview</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Employee Name</th>
+            <th>Approved Off Days</th>
+            <th>Remaining Off Days</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in off_days_data %}
+        <tr>
+            <td>{{ data.employee_name }}</td>
+            <td>{{ data.approved_off_days }}</td>
+            <td>{{ data.remaining_off_days }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -18,7 +18,7 @@ from app.services import employee_service
 from app.services.user_service import create_user, get_user_by_id
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
-
+from app.services import employee_shift_service
 employees_bp = Blueprint('employees', __name__)
 
 # Helper function to check if the current user is a manager
@@ -138,3 +138,24 @@ def update_role(id):
     else:
         flash('Failed to update role', 'error')
     return redirect(url_for('employees.index'))
+
+@employees_bp.route('/off_days', methods=['GET'])
+@login_required
+def off_days():
+    employees = employee_service.get_all_employees()
+    off_days_data = []
+
+    for employee in employees:
+        total_off_days = 20  # Total allowed off days
+        approved_off_days = employee_shift_service.get_approved_off_days(employee.id)
+        remaining_off_days = total_off_days - approved_off_days
+
+        off_days_data.append({
+            'employee_name': employee.fullname,
+            'approved_off_days': approved_off_days,
+            'remaining_off_days': remaining_off_days
+        })
+
+    return render_template('employees/off_days.html', off_days_data=off_days_data)
+
+

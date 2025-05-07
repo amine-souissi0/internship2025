@@ -2,35 +2,29 @@
 
 <div class="sidebar">
     <h3>Hello {{ current_user.username }} !</h3>
+
     <h2>For User</h2>
     <ul>
-        
         <li><a href="{{ url_for('my_shifts.index') }}" class="{% if active == 'my_shifts' %}active{% endif %} menu-item">My Shifts</a></li>
     </ul>
+
     <h2>For Manager</h2>
     <ul>
         <li><a href="{{ url_for('board.index') }}" class="{% if active == 'board' %}active{% endif %} menu-item">Board</a></li>
         <li><a href="{{ url_for('employees.index') }}" class="{% if active == 'employees' %}active{% endif %} menu-item">Employees</a></li>
-    {% if current_user.is_manager() %}
-        <li><a href="{{ url_for('shifts.index') }}" class="{% if active == 'shifts' %}active{% endif %} menu-item">Shifts</a></li>
-        <li><a href="{{ url_for('employee_shift.index') }}" class="{% if active == 'employee_shifts' %}active{% endif %} menu-item">Employee Shifts</a></li>
-        <li><a href="{{ url_for('requests.view_requests') }}" class="{% if active == 'requests' %}active{% endif %} menu-item">Approval Requests</a></li>
 
-        <li>
-            <a href="{{ url_for('excel.index') }}" class="{% if active == 'excel' %}active{% endif %} menu-item">
-                Import/Export Excel
-            </a>
-        </li>
-        
-
-    {% endif %}
+        {% if current_user.is_manager() %}
+            <li><a href="{{ url_for('shifts.index') }}" class="{% if active == 'shifts' %}active{% endif %} menu-item">Shifts</a></li>
+            <li><a href="{{ url_for('employee_shift.index') }}" class="{% if active == 'employee_shifts' %}active{% endif %} menu-item">Employee Shifts</a></li>
+            <li><a href="{{ url_for('requests.view_requests') }}" class="{% if active == 'requests' %}active{% endif %} menu-item">Approval Requests</a></li>
+            <li><a href="{{ url_for('excel.index') }}" class="{% if active == 'excel' %}active{% endif %} menu-item">Import/Export Excel</a></li>
+            <li><a href="{{ url_for('employees.off_days') }}" class="{% if active == 'off_days' %}active{% endif %} menu-item">Off Days</a></li>
+        {% endif %}
     </ul>
 
     <div class="logout">
         {% if current_user.is_authenticated %}
-            <a href="{{ url_for('auth.logout') }}" class="logout-button" title="Logout">
-                Logout
-            </a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-button" title="Logout">Logout</a>
         {% else %}
             <a href="{{ url_for('auth.login') }}">Login</a>
         {% endif %}

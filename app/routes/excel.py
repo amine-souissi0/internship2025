@@ -30,29 +30,21 @@ def index():
 
             # Read the CSV file with correct header
             if filename.endswith('.csv'):
-                # Load the CSV, skipping metadata rows and setting the header correctly
-                df = pd.read_csv(file_path, skiprows=5, header=0)  # Skip 5 rows (metadata, "Day", "Date") and use the 6th row as header
-                # Drop rows that are entirely NaN (e.g., after the data ends)
+                df = pd.read_csv(file_path, skiprows=5, header=0)
                 df = df.dropna(how='all')
-                # Reset index after dropping rows
                 df = df.reset_index(drop=True)
-                # Fill NaN values with empty strings, but avoid overwriting headers
                 df = df.fillna('')
-                # Ensure column names are stripped of whitespace
                 df.columns = [col.strip() for col in df.columns]
             else:
                 df = pd.read_excel(file_path, header=[1])
                 df = df.dropna(how='all')
                 df = df.fillna('')
 
-            # Save original for logic
             parsed_data = df.copy()
 
-            # Debug: Print the DataFrame to verify its structure
             print("Parsed Data Columns:", parsed_data.columns.tolist())
             print("Parsed Data Head:\n", parsed_data.head())
 
-            # Create display version for preview with blank Unnamed headers
             df_display = df.copy()
             df_display.columns = [
                 "" if isinstance(col, str) and col.startswith("Unnamed") else col
@@ -60,7 +52,6 @@ def index():
             ]
             parsed_display_data = df_display
 
-            # Convert only display version to HTML
             table_html = df_display.to_html(classes='table table-bordered', index=False, border=0, escape=False)
 
     return render_template('excel/excel.html', table_html=table_html, filename=filename)
@@ -76,19 +67,17 @@ def stats():
 
     df = parsed_data.copy()
 
-    # Debug: Print the DataFrame structure
     print("Stats DataFrame Columns:", df.columns.tolist())
     print("Stats DataFrame Head:\n", df.head())
 
-    # Define shift types to count
     shift_keywords = [
         "Morning", "Night", "Off", "REST", "MTA", "TOIL", "AL", "MC", "Half Day Off",
         "OFF Day & Replacing Full Evening Shift", "Morning shift & Cont 2nd half Evening replacement"
     ]
 
     stats_dict = {}
+    total_shifts = {key: 0 for key in shift_keywords}
 
-    # Check if "Full Name" exists in the DataFrame
     if "Full Name" not in df.columns:
         print("Full Name column not found in DataFrame. Available columns:", df.columns.tolist())
         return render_template('excel/shift_stats.html', stats=None)
@@ -96,7 +85,6 @@ def stats():
     full_name_idx = df.columns.get_loc("Full Name")
     print(f"Full Name column index: {full_name_idx}")
 
-    # Process user data
     for _, row in df.iterrows():
         user = row.get("Full Name", "")
         if not user or user in ["nan", "", "Legend", "Public Holidays MYS"]:
@@ -105,16 +93,14 @@ def stats():
         if user not in stats_dict:
             stats_dict[user] = {key: 0 for key in shift_keywords}
 
-        # Count shifts in the daily assignment columns (after "Full Name")
         for col in df.columns[full_name_idx + 1:]:
-            # Stop at the "Days Working from 1st Sept - 30th Sept" column
             if col == "Days Working from 1st Sept - 30th Sept":
                 break
             shift = str(row[col]).strip()
             if shift in stats_dict[user]:
                 stats_dict[user][shift] += 1
+                total_shifts[shift] += 1
 
-        # Handle additional fields from the last columns
         stats_dict[user]["MC"] = int(row.get("MC", 0)) if str(row.get("MC", "")) != "" else 0
         stats_dict[user]["Half Day Off"] = int(row.get("Half Day Off", 0)) if str(row.get("Half Day Off", "")) != "" else 0
         stats_dict[user]["MTA"] = int(row.get("MTA", 0)) if str(row.get("MTA", "")) != "" else 0
@@ -125,7 +111,9 @@ def stats():
         return render_template('excel/shift_stats.html', stats=None)
 
     print("Stats Dictionary:", stats_dict)
-    return render_template('excel/shift_stats.html', stats=stats_dict)
+    print("Total Shifts:", total_shifts)
+    users = list(stats_dict.keys())
+    return render_template('excel/shift_stats.html', stats=stats_dict, users=users, stats_dict=stats_dict)
 
 @excel_bp.route('/excel/download/<filename>')
 @login_required
@@ -142,7 +130,6 @@ def shift_details(user_name, shift_type):
     if parsed_data is None:
         return "No shift data available", 404
 
-    # Extract headers (adjust indices based on actual data)
     week_row = parsed_data.iloc[0] if len(parsed_data) > 0 else pd.Series()
     day_row = parsed_data.iloc[1] if len(parsed_data) > 1 else pd.Series()
     date_row = parsed_data.iloc[2] if len(parsed_data) > 2 else pd.Series()
@@ -211,12 +198,10 @@ def export_stats():
             if shift in stats_dict[user]:
                 stats_dict[user][shift] += 1
 
-    # Convert to DataFrame
     stats_df = pd.DataFrame.from_dict(stats_dict, orient='index')
     stats_df.reset_index(inplace=True)
     stats_df.rename(columns={"index": "User"}, inplace=True)
 
-    # Create Excel file in memory
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         stats_df.to_excel(writer, index=False, sheet_name='Shift Summary')
